@@ -70,19 +70,19 @@ int main()
 		{
 			//7 向客户端发送一条数据
 			char msgBuf[] = "蒋斯.\n";
-			send(_clientSock, msgBuf, strlen(msgBuf) + 1, 0);
+			send(_clientSock, msgBuf, (int)strlen(msgBuf) + 1, 0);
 		}
 		else if(0 == strcmp(_recvBuf, "getAge"))
 		{
 			//7 向客户端发送一条数据
 			char msgBuf[] = "26.\n";
-			send(_clientSock, msgBuf, strlen(msgBuf) + 1, 0);
+			send(_clientSock, msgBuf, (int)strlen(msgBuf) + 1, 0);
 		}
 		else
 		{
 			//7 向客户端发送一条数据
 			char msgBuf[] = "?????.\n";
-			send(_clientSock, msgBuf, strlen(msgBuf) + 1, 0);
+			send(_clientSock, msgBuf, (int)strlen(msgBuf) + 1, 0);
 		}
 	}
 

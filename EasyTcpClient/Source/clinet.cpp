@@ -50,7 +50,7 @@ int main()
 		else
 		{
 			//5 向服务器发送请求
-			send(_sock,cmdBuf,strlen(cmdBuf)+1,0);
+			send(_sock,cmdBuf,(int)strlen(cmdBuf)+1,0);
 		}
 
 		//6 接受服务器信息 recv
