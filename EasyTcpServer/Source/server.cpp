@@ -5,10 +5,41 @@
 #include<WinSock2.h>
 #include<stdio.h>
 
-struct DataPackage
+enum CMD
 {
-	int age;
-	char name[32];
+	CMD_LOGIN,
+	CMD_LOGOUT,
+	CMD_ERROR
+};
+
+struct DataHeader
+{
+	short dataLength;
+	short cmd;
+};
+
+//DataPackage
+struct Login
+{
+	char userName[32];
+	char passWord[32];
+};
+
+struct LoginResult
+{
+	int ressult;
+
+};
+
+struct Logout
+{
+	char userName[32];
+};
+
+struct LogoutResult
+{
+	int ressult;
+
 };
 
 int main()
@@ -60,30 +91,47 @@ int main()
 	}
 	printf("新客户端加入：SOCK=%d,IP= %s\n", int(_clientSock),inet_ntoa(_clinetAddr.sin_addr));
 
-	char _recvBuf[128] = {};
 
 	while (true)
 	{
+		DataHeader header = {};
 		//5 接受客户端请求数据
-		int nLen = recv(_clientSock,_recvBuf,128,0);
+		int nLen = recv(_clientSock,(char*)&header,sizeof(header),0);
 		if (nLen <= 0)
 		{
 			printf("客户端退出，任务结束。\n");
 			break;
 		}
-		printf("收到命令:%s\n", _recvBuf);
-		//6 处理请求
-		if (0 == strcmp(_recvBuf, "getInfo"))
+		printf("收到命令:%d,数据长度：%d\n",header.cmd,header.dataLength);
+		switch (header.cmd)
 		{
-			//7 向客户端发送一条数据
-			DataPackage dp = {80,"张国荣"};
-			send(_clientSock, (const char*)&dp, sizeof(data), 0);
+		case CMD_LOGIN:
+		{
+			Login login = {};
+			recv(_clientSock, (char*)&login, sizeof(login), 0);
+
+			LoginResult ret = {1};
+			send(_clientSock, (char*)&header, sizeof(header), 0);
+			send(_clientSock, (char*)&ret, sizeof(ret), 0);
 		}
-		else
+		break;
+		case CMD_LOGOUT:
 		{
-			//7 向客户端发送一条数据
-			char msgBuf[] = "?????.\n";
-			send(_clientSock, msgBuf, (int)strlen(msgBuf) + 1, 0);
+			Logout logout = {};
+			recv(_clientSock, (char*)&logout, sizeof(logout), 0);
+
+			LogoutResult ret = { 1};
+			send(_clientSock, (char*)&header, sizeof(header), 0);
+			send(_clientSock, (char*)&ret, sizeof(ret), 0);
+		}
+		break;
+		default:
+		{
+			header.cmd = CMD_ERROR;
+			header.dataLength = 0;
+			send(_clientSock, (char*)&header, sizeof(DataHeader), 0);
+		}
+		break;
 		}
 	}
 
