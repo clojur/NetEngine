@@ -1,0 +1,8 @@
+temp
+bin
+debug
+release
+.vs
+*.suo
+*.ipch
+*.filters
