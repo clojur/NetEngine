@@ -5,6 +5,13 @@
 #include<windows.h>
 #include<WinSock2.h>
 #include<stdio.h>
+
+struct DataPackage
+{
+	int age;
+	char name[32];
+};
+
 int main()
 {
 	WORD version = MAKEWORD(2, 2);
@@ -57,8 +64,11 @@ int main()
 		char recvBuf[128];
 		int nLen = recv(_sock, recvBuf, 128, 0);
 
-		if (nLen>0)
-			printf("接受到服务端数据：%s\n", recvBuf);
+		if (nLen > 0)
+		{
+			DataPackage* dp = (DataPackage*)recvBuf;
+			printf("接受到服务端数据：年龄=%d,姓名=%s\n", dp->age,dp->name);
+		}
 	}
 
 	//7 关闭套接字

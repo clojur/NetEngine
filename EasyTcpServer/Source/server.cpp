@@ -4,6 +4,13 @@
 #include<windows.h>
 #include<WinSock2.h>
 #include<stdio.h>
+
+struct DataPackage
+{
+	int age;
+	char name[32];
+};
+
 int main()
 {
 	WORD version = MAKEWORD(2, 2);
@@ -66,17 +73,11 @@ int main()
 		}
 		printf("收到命令:%s\n", _recvBuf);
 		//6 处理请求
-		if (0 == strcmp(_recvBuf, "getName"))
+		if (0 == strcmp(_recvBuf, "getInfo"))
 		{
 			//7 向客户端发送一条数据
-			char msgBuf[] = "蒋斯.\n";
-			send(_clientSock, msgBuf, (int)strlen(msgBuf) + 1, 0);
-		}
-		else if(0 == strcmp(_recvBuf, "getAge"))
-		{
-			//7 向客户端发送一条数据
-			char msgBuf[] = "26.\n";
-			send(_clientSock, msgBuf, (int)strlen(msgBuf) + 1, 0);
+			DataPackage dp = {80,"张国荣"};
+			send(_clientSock, (const char*)&dp, sizeof(data), 0);
 		}
 		else
 		{
