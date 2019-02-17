@@ -9,7 +9,9 @@
 enum CMD
 {
 	CMD_LOGIN,
+	CMD_LOGIN_RESULT,
 	CMD_LOGOUT,
+	CMD_LOGOUT_RESULT,
 	CMD_ERROR
 };
 
@@ -20,26 +22,48 @@ struct DataHeader
 };
 
 //DataPackage
-struct Login
+struct Login : public DataHeader
 {
+	Login()
+	{
+		dataLength = sizeof(Login);
+		cmd = CMD_LOGIN;
+	}
 	char userName[32];
 	char passWord[32];
 };
 
-struct LoginResult
+struct LoginResult : public DataHeader
 {
-	int ressult;
+	LoginResult()
+	{
+		dataLength = sizeof(LoginResult);
+		cmd = CMD_LOGIN_RESULT;
+		result = 0;
+	}
+	int result;
 
 };
 
-struct Logout
+struct Logout : public DataHeader
 {
+	Logout()
+	{
+		dataLength = sizeof(Logout);
+		cmd = CMD_LOGOUT;
+	}
 	char userName[32];
 };
 
-struct LogoutResult
+struct LogoutResult : public DataHeader
 {
-	int ressult;
+	LogoutResult()
+	{
+		dataLength = sizeof(LogoutResult);
+		cmd = CMD_LOGOUT_RESULT;
+		result = 0;
+	}
+	int result;
 
 };
 
@@ -88,31 +112,26 @@ int main()
 		}
 		else if (0 == strcmp(cmdBuf, "login"))
 		{
-			Login login = {"lyd", "lydmm"};
-			DataHeader dh = {sizeof(login),CMD_LOGIN};
+			Login login;
+			strcpy(login.userName,"jiangsi");
+			strcpy(login.passWord, "js6630232");
 			//5 向服务器发送请求
-			send(_sock, (const char*)&dh, sizeof(dh), 0);
 			send(_sock,(const char*)&login,sizeof(login),0);
 			//接受服务器返回数据
-			DataHeader retDh = {};
-			LoginResult retLogin = {};
-			recv(_sock, (char*)&retDh, sizeof(retDh), 0);
+			LoginResult retLogin;
 			recv(_sock, (char*)&retLogin, sizeof(retLogin), 0);
-			printf("LoginResult:%d",retLogin.ressult);
+			printf("LoginResult:%d",retLogin.result);
 		}
 		else if (0 == strcmp(cmdBuf, "logout"))
 		{
-			Logout logout = { "lyd"};
-			DataHeader dh = { sizeof(logout),CMD_LOGOUT};
+			Logout logout;
+			strcpy(logout.userName, "jiangsi");
 			//5 向服务器发送请求
-			send(_sock, (const char*)&dh, sizeof(dh), 0);
 			send(_sock, (const char*)&logout, sizeof(logout), 0);
 			//接受服务器返回数据
-			DataHeader retDh = {};
 			LogoutResult retLogout = {};
-			recv(_sock, (char*)&retDh, sizeof(retDh), 0);
 			recv(_sock, (char*)&retLogout, sizeof(retLogout), 0);
-			printf("LogoutResult:%d", retLogout.ressult);
+			printf("LogoutResult:%d", retLogout.result);
 		}
 		else
 		{
