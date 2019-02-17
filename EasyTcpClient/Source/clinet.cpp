@@ -120,7 +120,7 @@ int main()
 			//接受服务器返回数据
 			LoginResult retLogin;
 			recv(_sock, (char*)&retLogin, sizeof(retLogin), 0);
-			printf("LoginResult:%d",retLogin.result);
+			printf("LoginResult:%d\n",retLogin.result);
 		}
 		else if (0 == strcmp(cmdBuf, "logout"))
 		{
@@ -131,7 +131,7 @@ int main()
 			//接受服务器返回数据
 			LogoutResult retLogout = {};
 			recv(_sock, (char*)&retLogout, sizeof(retLogout), 0);
-			printf("LogoutResult:%d", retLogout.result);
+			printf("LogoutResult:%d\n", retLogout.result);
 		}
 		else
 		{

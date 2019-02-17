@@ -118,39 +118,41 @@ int main()
 
 	while (true)
 	{
-		DataHeader header = {};
+		//字节缓冲区
+		char szRecv[1024];
 		//5 接受客户端请求数据
-		int nLen = recv(_clientSock,(char*)&header,sizeof(header),0);
+		int nLen = recv(_clientSock, szRecv,sizeof(DataHeader),0);
+		DataHeader* header = (DataHeader*)szRecv;
 		if (nLen <= 0)
 		{
 			printf("客户端退出，任务结束。\n");
 			break;
 		}
 
-		switch (header.cmd)
+		switch (header->cmd)
 		{
 		case CMD_LOGIN:
 		{
-			Login login = {};
-			recv(_clientSock, (char*)&login+sizeof(DataHeader), sizeof(login)- sizeof(DataHeader), 0);
-			printf("收到命令：CMD_LOGIN 数据长度：%d userName=%s passWord=%s\n",login.dataLength ,login.userName ,login.passWord);
+			recv(_clientSock, szRecv +sizeof(DataHeader), header->dataLength- sizeof(DataHeader), 0);
+			Login* login = (Login*)szRecv;
+			printf("收到命令：CMD_LOGIN 数据长度：%d userName=%s passWord=%s\n",login->dataLength ,login->userName ,login->passWord);
 			LoginResult ret;
 			send(_clientSock, (char*)&ret, sizeof(ret), 0);
 		}
 		break;
 		case CMD_LOGOUT:
 		{
-			Logout logout = {};
-			recv(_clientSock, (char*)&logout+ sizeof(DataHeader), sizeof(logout)- sizeof(DataHeader), 0);
-			printf("收到命令：CMD_LOGOUT 数据长度：%d userName=%s\n", logout.dataLength , logout.userName);
+			recv(_clientSock, szRecv + sizeof(DataHeader), header->dataLength- sizeof(DataHeader), 0);
+			Logout* logout = (Logout*)szRecv;
+			printf("收到命令：CMD_LOGOUT 数据长度：%d userName=%s\n", logout->dataLength , logout->userName);
 			LogoutResult ret;
 			send(_clientSock, (char*)&ret, sizeof(ret), 0);
 		}
 		break;
 		default:
 		{
-			header.cmd = CMD_ERROR;
-			header.dataLength = 0;
+			header->cmd = CMD_ERROR;
+			header->dataLength = 0;
 			send(_clientSock, (char*)&header, sizeof(DataHeader), 0);
 		}
 		break;

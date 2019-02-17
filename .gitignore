@@ -6,3 +6,4 @@ release
 *.suo
 *.ipch
 *.filters
+*.user
