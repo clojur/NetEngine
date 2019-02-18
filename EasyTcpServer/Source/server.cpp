@@ -91,7 +91,7 @@ int HandleData(SOCKET clientSocket)
 	DataHeader* header = (DataHeader*)szRecv;
 	if (nLen <= 0)
 	{
-		printf("客户端<Socket=%d>退出，任务结束。\n",clientSocket);
+		printf("客户端<Socket=%d>退出，任务结束。\n",(int)clientSocket);
 		return -1;
 	}
 
@@ -101,7 +101,7 @@ int HandleData(SOCKET clientSocket)
 	{
 		recv(clientSocket, szRecv + sizeof(DataHeader), header->dataLength - sizeof(DataHeader), 0);
 		Login* login = (Login*)szRecv;
-		printf("收到客户端<Socket=%d>请求：CMD_LOGIN 数据长度：%d userName=%s passWord=%s\n", clientSocket,login->dataLength, login->userName, login->passWord);
+		printf("收到客户端<Socket=%d>请求：CMD_LOGIN 数据长度：%d userName=%s passWord=%s\n", (int)clientSocket,login->dataLength, login->userName, login->passWord);
 		LoginResult ret;
 		send(clientSocket, (char*)&ret, sizeof(ret), 0);
 	}
@@ -110,7 +110,7 @@ int HandleData(SOCKET clientSocket)
 	{
 		recv(clientSocket, szRecv + sizeof(DataHeader), header->dataLength - sizeof(DataHeader), 0);
 		Logout* logout = (Logout*)szRecv;
-		printf("收到客户端<Socket=%d>请求：CMD_LOGOUT 数据长度：%d userName=%s\n", clientSocket, logout->dataLength, logout->userName);
+		printf("收到客户端<Socket=%d>请求：CMD_LOGOUT 数据长度：%d userName=%s\n", (int)clientSocket, logout->dataLength, logout->userName);
 		LogoutResult ret;
 		send(clientSocket, (char*)&ret, sizeof(ret), 0);
 	}
@@ -186,8 +186,8 @@ int main()
 
 		///nfds 是一个整数值，是指fd_set集合中所有的SOCKET的范围，而不是数量
 		///即是所有文件描述符（sock）最大值+1 在windows中这个参数可以写0
-		timeval tv = {0,0};
-		int ret= select(_sock + 1, &fdRead, &fdWrite, &fdExcept, &tv);
+		timeval tv = {1,0};
+		int ret= select((int)_sock + 1, &fdRead, &fdWrite, &fdExcept, &tv);
 
 		if (ret < 0)
 		{
