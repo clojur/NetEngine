@@ -12,8 +12,6 @@
 #define SOCKET     int
 #define INVALID_SOCKET  (SOCKET)(~0)
 #define SOCKET_ERROR            (-1)
-#define WORD int
-typedef unsigned long       DWORD;
 #endif // _WIN32
 
 
