@@ -1,23 +1,23 @@
 ﻿#ifdef _WIN32
-	#define WIN32_LEAN_AND_MEAN
-	#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define WIN32_LEAN_AND_MEAN
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 
-	#define _CRT_SECURE_NO_WARNINGS
-	#include<windows.h>
-	#include<WinSock2.h>
+#define _CRT_SECURE_NO_WARNINGS
+#include<windows.h>
+#include<WinSock2.h>
 #else
-	#include<unistd.h>
-	#include<arpa/inet.h>
-	#include<string.h>
-	#define SOCKET 	int
-	#define INVALID_SOCKET  (SOCKET)(~0)
-	#define SOCKET_ERROR            (-1)
-	#define WORD int
-	typedef unsigned char       BYTE;
-	typedef unsigned long       DWORD;
-	typedef unsigned long ULONG_PTR, *PULONG_PTR;
-	typedef ULONG_PTR DWORD_PTR, *PDWORD_PTR;
-	#define MAKEWORD(a, b)      ((WORD)(((BYTE)(((DWORD_PTR)(a)) & 0xff)) | ((WORD)((BYTE)(((DWORD_PTR)(b)) & 0xff))) << 8))
+#include<unistd.h>
+#include<arpa/inet.h>
+#include<string.h>
+#define SOCKET     int
+#define INVALID_SOCKET  (SOCKET)(~0)
+#define SOCKET_ERROR            (-1)
+#define WORD int
+typedef unsigned char       BYTE;
+typedef unsigned long       DWORD;
+typedef unsigned long ULONG_PTR, *PULONG_PTR;
+typedef ULONG_PTR DWORD_PTR, *PDWORD_PTR;
+#define MAKEWORD(a, b)      ((WORD)(((BYTE)(((DWORD_PTR)(a)) & 0xff)) | ((WORD)((BYTE)(((DWORD_PTR)(b)) & 0xff))) << 8))
 
 #endif // _WIN32
 
@@ -138,7 +138,7 @@ int recvHandle(SOCKET serverSocket)
 	//缓冲区
 	char szRecv[4096] = {};
 	//5 接受客户端请求数据
-	int nLen = recv(serverSocket, szRecv, sizeof(DataHeader), 0);
+	int nLen = (int)recv(serverSocket, szRecv, sizeof(DataHeader), 0);
 	DataHeader* header = (DataHeader*)szRecv;
 	if (nLen <= 0)
 	{
@@ -199,7 +199,7 @@ int main()
 #ifdef _WIN32
 	_sin.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
 #else
-	_sin.sin_addr.s_addr=inet_addr("112.163.107.19");
+	_sin.sin_addr.s_addr = inet_addr("112.163.107.19");
 #endif // _WIN32
 	int rec = connect(_sock, (sockaddr*)&_sin, sizeof(sockaddr_in));
 	if (SOCKET_ERROR == rec)
@@ -245,7 +245,7 @@ int main()
 	}
 
 #ifdef _WIN32
-		//7 关闭套接字
+	//7 关闭套接字
 	closesocket(_sock);
 	///
 	WSACleanup();
