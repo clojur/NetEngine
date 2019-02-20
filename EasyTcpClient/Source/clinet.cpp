@@ -81,6 +81,7 @@ struct NewUserJoin : public DataHeader
 
 };
 
+bool g_bSendThreadExit = false;
 void sendHandle(SOCKET serverSocket)
 {
 	while (true)
@@ -91,6 +92,7 @@ void sendHandle(SOCKET serverSocket)
 		if (0 == strcmp(cmdBuff, "exit"))
 		{
 			printf("任务退出，程序结束\n");
+			g_bSendThreadExit = true;
 			return;
 		}
 		else if (0 == strcmp(cmdBuff, "login"))
@@ -187,8 +189,12 @@ int main()
 
 	//启动线程处理用户发送信息
 	std::thread userSend(sendHandle, _sock);
+	userSend.detach();
 	while (true)
 	{
+		if (g_bSendThreadExit)
+			break;
+
 		fd_set fdReads;
 		FD_ZERO(&fdReads);
 		FD_SET(_sock, &fdReads);
