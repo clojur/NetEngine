@@ -251,7 +251,7 @@ int main()
             {
                 if (-1 == HandleData(g_clients[i]))
                 {
-                    auto iter = std::find(g_clients.begin(), g_clients.end(), g_clients[i]);
+                    auto iter = g_clients.begin()+i;
                     if (iter != g_clients.end())
                     {
                         g_clients.erase(iter);
