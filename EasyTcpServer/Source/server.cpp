@@ -244,14 +244,13 @@ int main()
             g_clients.push_back(_clientSock);
             printf("新客户端加入：SOCK=%d,IP= %s\n", int(_clientSock), inet_ntoa(_clinetAddr.sin_addr));
         }
-        size_t count = g_clients.size();
-        for (size_t i = 0; i<count; ++i)
+        for (size_t i = 0; i<g_clients.size(); ++i)
         {
             if (FD_ISSET(g_clients[i], &fdRead))
             {
                 if (-1 == HandleData(g_clients[i]))
                 {
-                    auto iter = g_clients.begin()+i;
+                    auto iter = std::find(g_clients.begin(),g_clients.end(),g_clients[i]);
                     if (iter != g_clients.end())
                     {
                         g_clients.erase(iter);
