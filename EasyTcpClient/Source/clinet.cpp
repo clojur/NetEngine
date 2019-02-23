@@ -5,6 +5,7 @@
 #include<windows.h>
 #include<WinSock2.h>
 #include<stdio.h>
+#include<thread>
 
 enum CMD
 {
@@ -121,6 +122,36 @@ int HandleData(SOCKET serverSocket)
 	return 0;
 }
 
+void cmdThread(SOCKET serverSocket)
+{
+	char cmdBuf[256] = {};
+	scanf("%s",cmdBuf);
+
+	if (0 == strcmp(cmdBuf, "exit"))
+	{
+		printf("退出\n");
+		return;
+	}
+	else if (0 == strcmp(cmdBuf, "login"))
+	{
+		Login login;
+		strcpy(login.userName, "jiangsi");
+		strcpy(login.passWord, "js6630232");
+		send(serverSocket, (const char*)&login, sizeof(login), 0);
+	}
+	else if (0 == strcmp(cmdBuf, "logout"))
+	{
+		Logout logout;
+		strcpy(logout.userName, "jiangsi");
+		send(serverSocket, (const char*)&logout, sizeof(logout), 0);
+	}
+	else
+	{
+		printf("不支持的命令！\n");
+	}
+
+}
+
 int main()
 {
 	WORD version = MAKEWORD(2, 2);
@@ -152,14 +183,16 @@ int main()
 		printf("客户端连接成功！\n");
 	}
 
+	//启动线程
+	std::thread t1(cmdThread, _sock);
 
 	while (true)
 	{
 		fd_set fdReads;
 		FD_ZERO(&fdReads);
 		FD_SET(_sock, &fdReads);
-		timeval tv = { 0,0 };
-		int ret= select(_sock,&fdReads,0,0,0);
+		timeval tv = { 1,0 };
+		int ret= select(_sock,&fdReads,0,0,&tv);
 		if (ret < 0)
 		{
 			printf("select任务结束1\n");
@@ -176,12 +209,8 @@ int main()
 			}
 		}
 
-		//空闲时间处理其他业务
-		printf("空闲时间处理其他业务...\n");
-		Login login;
-		strcpy(login.userName,"jiangsi");
-		strcpy(login.passWord, "js6630232");
-		send(_sock,(const char*)&login,sizeof(login),0);
+		//空闲时间处理其他业务(另开线程)
+		//printf("空闲时间处理其他业务...\n");
 	}
 
 	//7 关闭套接字
