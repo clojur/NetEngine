@@ -1,256 +1,286 @@
-#define WIN32_LEAN_AND_MEAN
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
+ï»¿#ifdef _WIN32
+	#define WIN32_LEAN_AND_MEAN
+	#define _WINSOCK_DEPRECATED_NO_WARNINGS
 
-#include<windows.h>
-#include<WinSock2.h>
-#include<vector>
-#include<stdio.h>
+	#define _CRT_SECURE_NO_WARNINGS
+	#include<windows.h>
+	#include<WinSock2.h>
+#else
+	#include<unistd.h>
+	#include<arpa/inet.h>
+	#include<string.h>
+	#define SOCKET     int
+	#define INVALID_SOCKET  (SOCKET)(~0)
+	#define SOCKET_ERROR            (-1)
+#endif // _WIN32
+
+#include <algorithm>
+#include <vector>
+#include <stdio.h>
 
 enum CMD
 {
-	CMD_LOGIN,
-	CMD_LOGIN_RESULT,
-	CMD_LOGOUT,
-	CMD_LOGOUT_RESULT,
-	CMD_NEW_USER_JOIN,
-	CMD_ERROR
+    CMD_LOGIN,
+    CMD_LOGIN_RESULT,
+    CMD_LOGOUT,
+    CMD_LOGOUT_RESULT,
+    CMD_NEW_USER_JOIN,
+    CMD_ERROR
 };
 
 struct DataHeader
 {
-	short dataLength;
-	short cmd;
+    short dataLength;
+    short cmd;
 };
 
 //DataPackage
 struct Login : public DataHeader
 {
-	Login()
-	{
-		dataLength = sizeof(Login);
-		cmd = CMD_LOGIN;
-	}
-	char userName[32];
-	char passWord[32];
+    Login()
+    {
+        dataLength = sizeof(Login);
+        cmd = CMD_LOGIN;
+    }
+    char userName[32];
+    char passWord[32];
 };
 
 struct LoginResult : public DataHeader
 {
-	LoginResult()
-	{
-		dataLength = sizeof(LoginResult);
-		cmd = CMD_LOGIN_RESULT;
-		result = 0;
-	}
-	int result;
-
+    LoginResult()
+    {
+        dataLength = sizeof(LoginResult);
+        cmd = CMD_LOGIN_RESULT;
+        result = 0;
+    }
+    int result;
+    
 };
 
 struct Logout : public DataHeader
 {
-	Logout()
-	{
-		dataLength = sizeof(Logout);
-		cmd = CMD_LOGOUT;
-	}
-	char userName[32];
+    Logout()
+    {
+        dataLength = sizeof(Logout);
+        cmd = CMD_LOGOUT;
+    }
+    char userName[32];
 };
 
 struct LogoutResult : public DataHeader
 {
-	LogoutResult()
-	{
-		dataLength = sizeof(LogoutResult);
-		cmd = CMD_LOGOUT_RESULT;
-		result = 0;
-	}
-	int result;
-
+    LogoutResult()
+    {
+        dataLength = sizeof(LogoutResult);
+        cmd = CMD_LOGOUT_RESULT;
+        result = 0;
+    }
+    int result;
+    
 };
 
 struct NewUserJoin : public DataHeader
 {
-	NewUserJoin()
-	{
-		dataLength = sizeof(NewUserJoin);
-		cmd = CMD_NEW_USER_JOIN;
-		socketID = 0;
-	}
-	int socketID;
-
+    NewUserJoin()
+    {
+        dataLength = sizeof(NewUserJoin);
+        cmd = CMD_NEW_USER_JOIN;
+        socketID = 0;
+    }
+    int socketID;
+    
 };
 
 std::vector<SOCKET> g_clients;
 
 int HandleData(SOCKET clientSocket)
 {
-	//»º³åÇø
-	char szRecv[4096] = {};
-	//5 ½ÓÊÜ¿Í»§¶ËÇëÇóÊı¾İ
-	int nLen = recv(clientSocket, szRecv, sizeof(DataHeader), 0);
-	DataHeader* header = (DataHeader*)szRecv;
-	if (nLen <= 0)
-	{
-		printf("¿Í»§¶Ë<Socket=%d>ÍË³ö£¬ÈÎÎñ½áÊø¡£\n",(int)clientSocket);
-		return -1;
-	}
-
-	switch (header->cmd)
-	{
-	case CMD_LOGIN:
-	{
-		recv(clientSocket, szRecv + sizeof(DataHeader), header->dataLength - sizeof(DataHeader), 0);
-		Login* login = (Login*)szRecv;
-		printf("ÊÕµ½¿Í»§¶Ë<Socket=%d>ÇëÇó£ºCMD_LOGIN Êı¾İ³¤¶È£º%d userName=%s passWord=%s\n", (int)clientSocket,login->dataLength, login->userName, login->passWord);
-		LoginResult ret;
-		send(clientSocket, (char*)&ret, sizeof(ret), 0);
-	}
-	break;
-	case CMD_LOGOUT:
-	{
-		recv(clientSocket, szRecv + sizeof(DataHeader), header->dataLength - sizeof(DataHeader), 0);
-		Logout* logout = (Logout*)szRecv;
-		printf("ÊÕµ½¿Í»§¶Ë<Socket=%d>ÇëÇó£ºCMD_LOGOUT Êı¾İ³¤¶È£º%d userName=%s\n", (int)clientSocket, logout->dataLength, logout->userName);
-		LogoutResult ret;
-		send(clientSocket, (char*)&ret, sizeof(ret), 0);
-	}
-	break;
-	default:
-	{
-		header->cmd = CMD_ERROR;
-		header->dataLength = 0;
-		send(clientSocket, (char*)&header, sizeof(DataHeader), 0);
-	}
-	break;
-	}
-
-	return 0;
+    //ç¼“å†²åŒº
+    char szRecv[4096] = {};
+    //5 æ¥å—å®¢æˆ·ç«¯è¯·æ±‚æ•°æ®
+    int nLen = (int)recv(clientSocket, szRecv, sizeof(DataHeader), 0);
+    DataHeader* header = (DataHeader*)szRecv;
+    if (nLen <= 0)
+    {
+        printf("å®¢æˆ·ç«¯<Socket=%d>é€€å‡ºï¼Œä»»åŠ¡ç»“æŸã€‚\n", (int)clientSocket);
+        return -1;
+    }
+    
+    switch (header->cmd)
+    {
+        case CMD_LOGIN:
+        {
+            recv(clientSocket, szRecv + sizeof(DataHeader), header->dataLength - sizeof(DataHeader), 0);
+            Login* login = (Login*)szRecv;
+            printf("æ”¶åˆ°å®¢æˆ·ç«¯<Socket=%d>è¯·æ±‚ï¼šCMD_LOGIN æ•°æ®é•¿åº¦ï¼š%d userName=%s passWord=%s\n", (int)clientSocket, login->dataLength, login->userName, login->passWord);
+            LoginResult ret;
+            send(clientSocket, (char*)&ret, sizeof(ret), 0);
+        }
+            break;
+        case CMD_LOGOUT:
+        {
+            recv(clientSocket, szRecv + sizeof(DataHeader), header->dataLength - sizeof(DataHeader), 0);
+            Logout* logout = (Logout*)szRecv;
+            printf("æ”¶åˆ°å®¢æˆ·ç«¯<Socket=%d>è¯·æ±‚ï¼šCMD_LOGOUT æ•°æ®é•¿åº¦ï¼š%d userName=%s\n", (int)clientSocket, logout->dataLength, logout->userName);
+            LogoutResult ret;
+            send(clientSocket, (char*)&ret, sizeof(ret), 0);
+        }
+            break;
+        default:
+        {
+            header->cmd = CMD_ERROR;
+            header->dataLength = 0;
+            send(clientSocket, (char*)&header, sizeof(DataHeader), 0);
+        }
+            break;
+    }
+    
+    return 0;
 }
 
 int main()
 {
-	WORD version = MAKEWORD(2, 2);
-	WSADATA data;
-	WSAStartup(version, &data);
-	///·şÎñ¶Ë½¨Á¢
-	//1 ½¨Á¢Ò»¸ösocket
-	SOCKET _sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (INVALID_SOCKET == _sock)
-	{
-		printf("´íÎó£¬·şÎñ¶Ë½¨Á¢Ì×½Ó×ÖÊ§°Ü£¡\n");
-	}
-	else
-	{
-		printf("·şÎñ¶Ë½¨Á¢Ì×½Ó×Ö³É¹¦£¡\n");
-	}
-	//2 °ó¶¨ÓÃÓÚ¿Í»§¶ËÁ¬½ÓµÄÍøÂç¶Ë¿Ú
-	sockaddr_in _sin = {};
-	_sin.sin_family = AF_INET;
-	_sin.sin_port = htons(4567);
-	_sin.sin_addr.S_un.S_addr = INADDR_ANY;//inet_addr("127.0.0.1");
-	if (bind(_sock, (sockaddr*)&_sin, sizeof(sockaddr_in)) == SOCKET_ERROR)
-	{
-		printf("´íÎó,°ó¶¨ÍøÂç¶Ë¿ÚÊ§°Ü£¡\n");
-	}
-	else
-	{
-		printf("°ó¶¨ÍøÂç¶Ë¿Ú³É¹¦£¡\n");
-	}
-	//3 ¼àÌıÍøÂç¶Ë¿Ú
-	if (listen(_sock, 5) == SOCKET_ERROR)
-	{
-		printf("´íÎó£¬¼àÌıÍøÂç¶Ë¿ÚÊ§°Ü£¡\n");
-	}
-	else
-	{
-		printf("¼àÌı¶Ë¿Ú³É¹¦£¡\n");
-	}
-
-
-	while (true)
-	{
-		//²®¿ËÀû socket
-		fd_set fdRead;
-		fd_set fdWrite;
-		fd_set fdExcept;
-
-		//ÇåÀí¼¯ºÏ
-		FD_ZERO(&fdRead);
-		FD_ZERO(&fdWrite);
-		FD_ZERO(&fdExcept);
-
-		//½«socket¼ÓÈë¼¯ºÏÖĞ
-		FD_SET(_sock, &fdRead);
-		FD_SET(_sock, &fdWrite);
-		FD_SET(_sock, &fdExcept);
-
-		size_t clientCount = g_clients.size();
-		for (size_t n = 0; n < clientCount; ++n)
-		{
-			FD_SET(g_clients[n], &fdRead);//½«socket¼ÓÈë¶Á¼¯ºÏÖĞ
-		}
-
-		///nfds ÊÇÒ»¸öÕûÊıÖµ£¬ÊÇÖ¸fd_set¼¯ºÏÖĞËùÓĞµÄSOCKETµÄ·¶Î§£¬¶ø²»ÊÇÊıÁ¿
-		///¼´ÊÇËùÓĞÎÄ¼şÃèÊö·û£¨sock£©×î´óÖµ+1 ÔÚwindowsÖĞÕâ¸ö²ÎÊı¿ÉÒÔĞ´0
-		timeval tv = {1,0};
-		int ret= select((int)_sock + 1, &fdRead, &fdWrite, &fdExcept, &tv);
-
-		if (ret < 0)
-		{
-			printf("selectÈÎÎñ½áÊø¡£\n");
-			break;
-		}
-		//ÅĞ¶ÏsocketÊÇ·ñÔÚ¼¯ºÏÖĞ
-		if (FD_ISSET(_sock, &fdRead))
-		{
-			FD_CLR(_sock, &fdRead);
-			//4 µÈ´ı¿Í»§¶ËÁ¬½Ó
-			sockaddr_in _clinetAddr = {};
-			int nAddrLen = sizeof(sockaddr_in);
-			SOCKET _clientSock = INVALID_SOCKET;
-			_clientSock = accept(_sock, (sockaddr*)&_clinetAddr, &nAddrLen);
-			if (INVALID_SOCKET == _clientSock)
-			{
-				printf("´íÎó£¬½ÓÊÕµ½ÎŞĞ§¿Í»§¶ËSOCKET...\n");
-			}
-			else
-			{
-				size_t clientCount = g_clients.size();
-				for (size_t n = 0; n < clientCount; ++n)
-				{
-					NewUserJoin userJoin;
-					send(g_clients[n], (const char*)&userJoin, sizeof(NewUserJoin), 0);
-				}
-				g_clients.push_back(_clientSock);
-				printf("ĞÂ¿Í»§¶Ë¼ÓÈë£ºSOCK=%d,IP= %s\n", int(_clientSock), inet_ntoa(_clinetAddr.sin_addr));
-			}
-
-		}
-
-		for (size_t n = 0; n < fdRead.fd_count; ++n)
-		{
-			if (-1 == HandleData(fdRead.fd_array[n]))
-			{
-				auto iter = find(g_clients.begin(), g_clients.end(), fdRead.fd_array[n]);
-				if (iter != g_clients.end())
-					g_clients.erase(iter);
-			}
-		}
-
-		//¿ÕÏĞÊ±¼ä´¦ÀíÆäËûÒµÎñ
-		//printf("¿ÕÏĞÊ±¼ä´¦ÀíÆäËûÒµÎñ...\n");
-	}
-
-	for (size_t n = 0; n < g_clients.size(); ++n)
-	{
-		closesocket(g_clients[n]);
-	}
-	//6 ¹Ø±ÕÌ×½Ó×Ö
-	closesocket(_sock);
-	///
-	printf("ÒÑÍË³ö£¬ÈÎÎñ½áÊø¡£");
-	WSACleanup();
-	getchar();
-
-	return 0;
+#ifdef _WIN32
+    WORD version = MAKEWORD(2, 2);
+    WSADATA data;
+    WSAStartup(version, &data);
+#endif
+    ///æœåŠ¡ç«¯å»ºç«‹
+    //1 å»ºç«‹ä¸€ä¸ªsocket
+    SOCKET _sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (INVALID_SOCKET == _sock)
+    {
+        printf("é”™è¯¯ï¼ŒæœåŠ¡ç«¯å»ºç«‹å¥—æ¥å­—å¤±è´¥ï¼\n");
+    }
+    else
+    {
+        printf("æœåŠ¡ç«¯å»ºç«‹å¥—æ¥å­—æˆåŠŸï¼\n");
+    }
+    //2 ç»‘å®šç”¨äºå®¢æˆ·ç«¯è¿æ¥çš„ç½‘ç»œç«¯å£
+    sockaddr_in _sin = {};
+    _sin.sin_family = AF_INET;
+    _sin.sin_port = htons(4567);
+    
+#ifdef _WIN32
+    _sin.sin_addr.S_un.S_addr = INADDR_ANY;
+#else
+    _sin.sin_addr.s_addr = INADDR_ANY;
+#endif // _WIN32
+    if (bind(_sock, (sockaddr*)&_sin, sizeof(sockaddr_in)) == SOCKET_ERROR)
+    {
+        printf("é”™è¯¯,ç»‘å®šç½‘ç»œç«¯å£å¤±è´¥ï¼\n");
+    }
+    else
+    {
+        printf("ç»‘å®šç½‘ç»œç«¯å£æˆåŠŸï¼\n");
+    }
+    //3 ç›‘å¬ç½‘ç»œç«¯å£
+    if (listen(_sock, 5) == SOCKET_ERROR)
+    {
+        printf("é”™è¯¯ï¼Œç›‘å¬ç½‘ç»œç«¯å£å¤±è´¥ï¼\n");
+    }
+    else
+    {
+        printf("ç›‘å¬ç«¯å£æˆåŠŸï¼\n");
+    }
+    
+    
+    while (true)
+    {
+        //ä¼¯å…‹åˆ© socket
+        fd_set fdRead; FD_ZERO(&fdRead);
+        fd_set fdWrite; FD_ZERO(&fdWrite);
+        fd_set fdExcept; FD_ZERO(&fdExcept);
+        
+        FD_SET(_sock, &fdRead);
+        FD_SET(_sock, &fdWrite);
+        FD_SET(_sock, &fdExcept);
+        
+        SOCKET maxSock=_sock;
+        
+        size_t clientCount = g_clients.size();
+        for (size_t n = 0; n <clientCount; ++n)
+        {
+            FD_SET(g_clients[n], &fdRead);
+            //æŸ¥æ‰¾æœ€å¤§æè¿°ç¬¦
+            if(maxSock<g_clients[n])
+                maxSock=g_clients[n];
+        }
+        
+        ///nfds æ˜¯ä¸€ä¸ªæ•´æ•°å€¼ï¼Œæ˜¯æŒ‡fd_seté›†åˆä¸­æ‰€æœ‰çš„SOCKETçš„èŒƒå›´ï¼Œè€Œä¸æ˜¯æ•°é‡
+        ///å³æ˜¯æ‰€æœ‰æ–‡ä»¶æè¿°ç¬¦ï¼ˆsockï¼‰æœ€å¤§å€¼+1 åœ¨windowsä¸­è¿™ä¸ªå‚æ•°å¯ä»¥å†™0
+        timeval tv = { 1,0 };
+        int ret = select(maxSock+1, &fdRead, &fdWrite, &fdExcept, &tv);
+        
+        if (ret < 0)
+        {
+            printf("selectä»»åŠ¡ç»“æŸã€‚\n");
+            break;
+        }
+        if (FD_ISSET(_sock, &fdRead))
+        {
+            FD_CLR(_sock, &fdRead);
+            //4 ç­‰å¾…å®¢æˆ·ç«¯è¿æ¥
+            sockaddr_in _clinetAddr = {};
+            int nAddrLen = sizeof(sockaddr_in);
+            SOCKET _clientSock = INVALID_SOCKET;
+#ifdef _WIN32
+            _clientSock = accept(_sock, (sockaddr*)&_clinetAddr, &nAddrLen);
+#else
+            _clientSock = accept(_sock, (sockaddr*)&_clinetAddr, (socklen_t*)&nAddrLen);
+#endif
+            
+            if (INVALID_SOCKET == _clientSock)
+            {
+                printf("é”™è¯¯ï¼Œæ¥æ”¶åˆ°æ— æ•ˆå®¢æˆ·ç«¯SOCKET...\n");
+            }
+            size_t clientCount = g_clients.size();
+            for (size_t n = 0; n <clientCount; ++n)
+            {
+                NewUserJoin userJoin;
+                send(g_clients[n], (const char*)&userJoin, sizeof(NewUserJoin), 0);
+            }
+            g_clients.push_back(_clientSock);
+            printf("æ–°å®¢æˆ·ç«¯åŠ å…¥ï¼šSOCK=%d,IP= %s\n", int(_clientSock), inet_ntoa(_clinetAddr.sin_addr));
+        }
+        for (size_t i = 0; i<g_clients.size(); ++i)
+        {
+            if (FD_ISSET(g_clients[i], &fdRead))
+            {
+                if (-1 == HandleData(g_clients[i]))
+                {
+                    auto iter = std::find(g_clients.begin(),g_clients.end(),g_clients[i]);
+                    if (iter != g_clients.end())
+                    {
+                        g_clients.erase(iter);
+                    }
+                }
+            }
+        }
+        
+        //ç©ºé—²æ—¶é—´å¤„ç†å…¶ä»–ä¸šåŠ¡
+        //printf("ç©ºé—²æ—¶é—´å¤„ç†å…¶ä»–ä¸šåŠ¡...\n");
+    }
+    
+#ifdef _WIN32
+    for (size_t n = 0; n < g_clients.size(); ++n)
+    {
+        closesocket(g_clients[n]);
+    }
+    //6 å…³é—­å¥—æ¥å­—
+    closesocket(_sock);
+    ///
+    WSACleanup();
+#else
+    for (size_t n = 0; n < g_clients.size(); ++n)
+    {
+        close(g_clients[n]);
+    }
+    close(_sock);
+#endif
+    printf("å·²é€€å‡ºï¼Œä»»åŠ¡ç»“æŸã€‚");
+    getchar();
+    
+    return 0;
 }
