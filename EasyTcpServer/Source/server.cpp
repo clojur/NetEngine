@@ -148,8 +148,8 @@ int main()
 #endif
     ///服务端建立
     //1 建立一个socket
-    SOCKET _sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (INVALID_SOCKET == _sock)
+    SOCKET _serverSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (INVALID_SOCKET == _serverSock)
     {
         printf("错误，服务端建立套接字失败！\n");
     }
@@ -167,7 +167,7 @@ int main()
 #else
     _sin.sin_addr.s_addr = INADDR_ANY;
 #endif // _WIN32
-    if (bind(_sock, (sockaddr*)&_sin, sizeof(sockaddr_in)) == SOCKET_ERROR)
+    if (bind(_serverSock, (sockaddr*)&_sin, sizeof(_sin)) == SOCKET_ERROR)
     {
         printf("错误,绑定网络端口失败！\n");
     }
@@ -176,7 +176,7 @@ int main()
         printf("绑定网络端口成功！\n");
     }
     //3 监听网络端口
-    if (listen(_sock, 5) == SOCKET_ERROR)
+    if (listen(_serverSock, 5) == SOCKET_ERROR)
     {
         printf("错误，监听网络端口失败！\n");
     }
@@ -193,11 +193,11 @@ int main()
         fd_set fdWrite; FD_ZERO(&fdWrite);
         fd_set fdExcept; FD_ZERO(&fdExcept);
         
-        FD_SET(_sock, &fdRead);
-        FD_SET(_sock, &fdWrite);
-        FD_SET(_sock, &fdExcept);
+        FD_SET(_serverSock, &fdRead);
+        FD_SET(_serverSock, &fdWrite);
+        FD_SET(_serverSock, &fdExcept);
         
-        SOCKET maxSock=_sock;
+        SOCKET maxSock=_serverSock;
         
         size_t clientCount = g_clients.size();
         for (size_t n = 0; n <clientCount; ++n)
@@ -218,17 +218,17 @@ int main()
             printf("select任务结束。\n");
             break;
         }
-        if (FD_ISSET(_sock, &fdRead))
+        if (FD_ISSET(_serverSock, &fdRead))
         {
-            FD_CLR(_sock, &fdRead);
+            FD_CLR(_serverSock, &fdRead);
             //4 等待客户端连接
             sockaddr_in _clinetAddr = {};
             int nAddrLen = sizeof(sockaddr_in);
             SOCKET _clientSock = INVALID_SOCKET;
 #ifdef _WIN32
-            _clientSock = accept(_sock, (sockaddr*)&_clinetAddr, &nAddrLen);
+            _clientSock = accept(_serverSock, (sockaddr*)&_clinetAddr, &nAddrLen);
 #else
-            _clientSock = accept(_sock, (sockaddr*)&_clinetAddr, (socklen_t*)&nAddrLen);
+            _clientSock = accept(_serverSock, (sockaddr*)&_clinetAddr, (socklen_t*)&nAddrLen);
 #endif
             
             if (INVALID_SOCKET == _clientSock)
@@ -269,7 +269,7 @@ int main()
         closesocket(g_clients[n]);
     }
     //6 关闭套接字
-    closesocket(_sock);
+    closesocket(_serverSock);
     ///
     WSACleanup();
 #else
@@ -277,7 +277,7 @@ int main()
     {
         close(g_clients[n]);
     }
-    close(_sock);
+    close(_serverSock);
 #endif
     printf("已退出，任务结束。");
     getchar();

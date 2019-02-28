@@ -20,6 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\client.cpp" />
+    <ClCompile Include="Source\easyTcpClient.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\easyTcpClient.h" />
+    <ClInclude Include="Source\messageHeader.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
