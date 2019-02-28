@@ -7,3 +7,7 @@ release
 *.ipch
 *.filters
 *.user
+*.o
+*.so
+build
+lib
