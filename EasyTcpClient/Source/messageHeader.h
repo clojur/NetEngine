@@ -1,4 +1,4 @@
-enum CMD
+﻿enum CMD
 {
 	CMD_LOGIN,
 	CMD_LOGIN_RESULT,

@@ -1,4 +1,4 @@
-#ifndef _easyTcpClient_h
+﻿#ifndef _easyTcpClient_h
 #define _easyTcpClient_h
 
 #ifdef _WIN32

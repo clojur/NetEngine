@@ -1,4 +1,4 @@
-#include "easyTcpClient.h"
+ï»¿#include "easyTcpClient.h"
 
 EasyTcpClient::EasyTcpClient()
 {
@@ -14,7 +14,7 @@ void EasyTcpClient::initSocket()
 {
 	if (_sock != INVALID_SOCKET)
 	{
-		printf("<socket=%d>¹Ø±Õ¾ÉÁ¬½Ó...\n", _sock);
+		printf("<socket=%d>å…³é—­æ—§è¿æ¥...\n", _sock);
 		closeSocket();
 	}
 
@@ -23,16 +23,16 @@ void EasyTcpClient::initSocket()
 	WSADATA data;
 	WSAStartup(version, &data);
 #endif
-	///TCP¡ª¡ªclient
-	//½¨Á¢Ò»¸ösocket
+	///TCPâ€”â€”client
+	//å»ºç«‹ä¸€ä¸ªsocket
 	_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (INVALID_SOCKET == _sock)
 	{
-		printf("´íÎó£¬¿Í»§¶Ë½¨Á¢Ì×½Ó×ÖÊ§°Ü£¡\n");
+		printf("é”™è¯¯ï¼Œå®¢æˆ·ç«¯å»ºç«‹å¥—æ¥å­—å¤±è´¥ï¼\n");
 	}
 	else
 	{
-		printf("¿Í»§¶Ë½¨Á¢Ì×½Ó×Ö³É¹¦£¡\n");
+		printf("å®¢æˆ·ç«¯å»ºç«‹å¥—æ¥å­—æˆåŠŸï¼\n");
 	}
 }
 
@@ -43,7 +43,7 @@ int EasyTcpClient::connectServer(const char * ip, short port)
 		initSocket();
 	}
 
-	//Á¬½Ó·şÎñÆ÷
+	//è¿æ¥æœåŠ¡å™¨
 	sockaddr_in _sin = {};
 	_sin.sin_family = AF_INET;
 	_sin.sin_port = htons(port);
@@ -55,11 +55,11 @@ int EasyTcpClient::connectServer(const char * ip, short port)
 	int rec = connect(_sock, (sockaddr*)&_sin, sizeof(sockaddr_in));
 	if (SOCKET_ERROR == rec)
 	{
-		printf("´íÎó£¬¿Í»§¶ËÁ¬½ÓÊ§°Ü!\n");
+		printf("é”™è¯¯ï¼Œå®¢æˆ·ç«¯è¿æ¥å¤±è´¥!\n");
 	}
 	else
 	{
-		printf("¿Í»§¶ËÁ¬½Ó³É¹¦£¡\n");
+		printf("å®¢æˆ·ç«¯è¿æ¥æˆåŠŸï¼\n");
 	}
 	return rec;
 }
@@ -69,7 +69,7 @@ void EasyTcpClient::closeSocket()
 	if (_sock != INVALID_SOCKET)
 	{
 #ifdef _WIN32
-		//¹Ø±ÕÌ×½Ó×Ö
+		//å…³é—­å¥—æ¥å­—
 		closesocket(_sock);
 		///
 		WSACleanup();
@@ -92,7 +92,7 @@ bool EasyTcpClient::onRun()
 		int ret = select(_sock + 1, &fdReads, 0, 0, &tv);
 		if (ret < 0)
 		{
-			printf("<socket=%d>selectÈÎÎñ½áÊø1\n", _sock);
+			printf("<socket=%d>selectä»»åŠ¡ç»“æŸ1\n", _sock);
 			return false;
 		}
 		if (FD_ISSET(_sock, &fdReads))
@@ -101,7 +101,7 @@ bool EasyTcpClient::onRun()
 
 			if (-1 == recvDataHandler())
 			{
-				printf("<socket=%d>selectÈÎÎñ½áÊø1\n", _sock);
+				printf("<socket=%d>selectä»»åŠ¡ç»“æŸ1\n", _sock);
 				return false;
 			}
 		}
@@ -122,17 +122,17 @@ void EasyTcpClient::quit()
 	_sock = INVALID_SOCKET;
 }
 
-//½ÓÊÜÊı¾İ ´¦Àíğ¤°ü ²ğ·Ö°ü
+//æ¥å—æ•°æ® å¤„ç†é»åŒ… æ‹†åˆ†åŒ…
 int EasyTcpClient::recvDataHandler()
 {
-	//»º³åÇø
+	//ç¼“å†²åŒº
 	char szRecv[4096] = {};
-	//5 ½ÓÊÜ¿Í»§¶ËÇëÇóÊı¾İ
+	//5 æ¥å—å®¢æˆ·ç«¯è¯·æ±‚æ•°æ®
 	int nLen = (int)recv(_sock, szRecv, sizeof(DataHeader), 0);
 	DataHeader* header = (DataHeader*)szRecv;
 	if (nLen <= 0)
 	{
-		printf("Óë·şÎñÆ÷¶Ï¿ªÁ¬½Ó£¬ÈÎÎñ½áÊø¡£\n");
+		printf("ä¸æœåŠ¡å™¨æ–­å¼€è¿æ¥ï¼Œä»»åŠ¡ç»“æŸã€‚\n");
 		return -1;
 	}
 
@@ -142,7 +142,7 @@ int EasyTcpClient::recvDataHandler()
 	return 0;
 }
 
-//ÏìÓ¦ÍøÂçÏûÏ¢
+//å“åº”ç½‘ç»œæ¶ˆæ¯
 void EasyTcpClient::onNetMsg(DataHeader * header)
 {
 	switch (header->cmd)
@@ -151,20 +151,20 @@ void EasyTcpClient::onNetMsg(DataHeader * header)
 	{
 
 		LoginResult* retLogin = (LoginResult*)header;
-		printf("½ÓÊÜµ½·şÎñÆ÷ÏûÏ¢£ºCMD_LOGIN_RESULT£¬Êı¾İ³¤¶È£º%d,result=%d\n", retLogin->dataLength, retLogin->result);
+		printf("æ¥å—åˆ°æœåŠ¡å™¨æ¶ˆæ¯ï¼šCMD_LOGIN_RESULTï¼Œæ•°æ®é•¿åº¦ï¼š%d,result=%d\n", retLogin->dataLength, retLogin->result);
 	}
 	break;
 	case CMD_LOGOUT_RESULT:
 	{
 		
 		LogoutResult* retLogout = (LogoutResult*)header;
-		printf("½ÓÊÜµ½·şÎñÆ÷ÏûÏ¢£ºCMD_LOGOUT_RESULT£¬Êı¾İ³¤¶È£º%d,result=%d\n", retLogout->dataLength, retLogout->result);
+		printf("æ¥å—åˆ°æœåŠ¡å™¨æ¶ˆæ¯ï¼šCMD_LOGOUT_RESULTï¼Œæ•°æ®é•¿åº¦ï¼š%d,result=%d\n", retLogout->dataLength, retLogout->result);
 	}
 	break;
 	case CMD_NEW_USER_JOIN:
 	{
 		NewUserJoin* newUseJoin = (NewUserJoin*)header;
-		printf("½ÓÊÜµ½·şÎñÆ÷ÏûÏ¢£ºCMD_NEW_USER_JOIN£¬Êı¾İ³¤¶È£º%d,¼ÓÈësocketID=%d\n", newUseJoin->dataLength, newUseJoin->socketID);
+		printf("æ¥å—åˆ°æœåŠ¡å™¨æ¶ˆæ¯ï¼šCMD_NEW_USER_JOINï¼Œæ•°æ®é•¿åº¦ï¼š%d,åŠ å…¥socketID=%d\n", newUseJoin->dataLength, newUseJoin->socketID);
 	}
 	break;
 	}
