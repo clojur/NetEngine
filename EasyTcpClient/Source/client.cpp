@@ -41,7 +41,15 @@ void sendHandle(EasyTcpClient* pClient)
 int main()
 {
 	EasyTcpClient client;
-	client.connectServer("127.0.0.1", 4567);
+	char buf[128] = {};
+	printf("请输入服务器IP：");
+	scanf("%s",buf);
+	
+	if (SOCKET_ERROR == client.connectServer(buf, 4567))
+	{
+		printf("无效IP！\n");
+		return -1;
+	}
 
 	std::thread userSend(sendHandle, &client);
 	userSend.detach();
