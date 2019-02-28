@@ -1,4 +1,7 @@
-﻿enum CMD
+﻿#ifndef _messageHeader_h
+#define _messageHeader_h
+
+enum CMD
 {
 	CMD_LOGIN,
 	CMD_LOGIN_RESULT,
@@ -71,3 +74,5 @@ struct NewUserJoin : public DataHeader
 	int socketID;
 
 };
+
+#endif
