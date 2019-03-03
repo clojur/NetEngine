@@ -17,7 +17,7 @@ set( CMAKE_BUILD_TYPE Debug )
 
 # 设置编译选项
 # 允许c++11标准、O3优化、多线程。match选项可避免一些cpu上的问题
-IF (!WIN32)
+IF (UNIX)
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native -O3 -pthread" )
 ENDIF()
 
