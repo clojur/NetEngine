@@ -40,26 +40,32 @@ void sendHandle(EasyTcpClient* pClient)
 
 int main()
 {
-	EasyTcpClient client;
 	char buf[128] = {};
 	printf("请输入服务器IP：");
 	scanf("%s",buf);
 	
-	if (SOCKET_ERROR == client.connectServer(buf, 4567))
+	EasyTcpClient client1;
+	client1.connectServer(buf, 4567);
+
+	EasyTcpClient client2;
+	client2.connectServer(buf, 4567);
+
+	EasyTcpClient client2;
+	client2.connectServer(buf, 4567);
+
+
+	std::thread userSend1(sendHandle, &client1);
+	userSend1.detach();
+
+	std::thread userSend2(sendHandle, &client2);
+	userSend2.detach();
+
+	while (client1.isRun())
 	{
-		printf("无效IP！\n");
-		return -1;
+		client1.onRun();
 	}
 
-	std::thread userSend(sendHandle, &client);
-	userSend.detach();
-
-	while (client.isRun())
-	{
-		client.onRun();
-	}
-
-	client.closeSocket();
-
+	client1.closeSocket();
+	client2.closeSocket();
 	return 0;
 }

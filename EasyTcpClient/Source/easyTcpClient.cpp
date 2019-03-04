@@ -28,11 +28,11 @@ void EasyTcpClient::initSocket()
 	_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (INVALID_SOCKET == _sock)
 	{
-		printf("错误，客户端建立套接字失败！\n");
+		printf("错误，客户端建立Socket失败！\n");
 	}
 	else
 	{
-		printf("客户端建立套接字成功！\n");
+		printf("客户端建立<Socket=%d>成功！\n",_sock);
 	}
 }
 
@@ -55,11 +55,11 @@ int EasyTcpClient::connectServer(const char * ip, short port)
 	int rec = connect(_sock, (sockaddr*)&_sin, sizeof(sockaddr_in));
 	if (SOCKET_ERROR == rec)
 	{
-		printf("错误，客户端连接失败!\n");
+		printf("<Socket=%d>错误，连接服务器<%s:%d>失败!\n",_sock,ip,port);
 	}
 	else
 	{
-		printf("客户端连接成功！\n");
+		printf("<Socket=%d>连接服务器<%s:%d>成功！\n",_sock,ip, port);
 	}
 	return rec;
 }
@@ -132,7 +132,7 @@ int EasyTcpClient::recvDataHandler()
 	DataHeader* header = (DataHeader*)szRecv;
 	if (nLen <= 0)
 	{
-		printf("与服务器断开连接，任务结束。\n");
+		printf("<socket=%d>与服务器断开连接，任务结束。\n",_sock);
 		return -1;
 	}
 
@@ -151,20 +151,20 @@ void EasyTcpClient::onNetMsg(DataHeader * header)
 	{
 
 		LoginResult* retLogin = (LoginResult*)header;
-		printf("接受到服务器消息：CMD_LOGIN_RESULT，数据长度：%d,result=%d\n", retLogin->dataLength, retLogin->result);
+		printf("<socket=%d>接受到服务器消息：CMD_LOGIN_RESULT，数据长度：%d,result=%d\n", _sock,retLogin->dataLength, retLogin->result);
 	}
 	break;
 	case CMD_LOGOUT_RESULT:
 	{
 		
 		LogoutResult* retLogout = (LogoutResult*)header;
-		printf("接受到服务器消息：CMD_LOGOUT_RESULT，数据长度：%d,result=%d\n", retLogout->dataLength, retLogout->result);
+		printf("<socket=%d>接受到服务器消息：CMD_LOGOUT_RESULT，数据长度：%d,result=%d\n", _sock, retLogout->dataLength, retLogout->result);
 	}
 	break;
 	case CMD_NEW_USER_JOIN:
 	{
 		NewUserJoin* newUseJoin = (NewUserJoin*)header;
-		printf("接受到服务器消息：CMD_NEW_USER_JOIN，数据长度：%d,加入socketID=%d\n", newUseJoin->dataLength, newUseJoin->socketID);
+		printf("<socket=%d>接受到服务器消息：CMD_NEW_USER_JOIN，数据长度：%d,加入socketID=%d\n", _sock, newUseJoin->dataLength, newUseJoin->socketID);
 	}
 	break;
 	}
