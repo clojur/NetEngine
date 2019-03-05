@@ -40,18 +40,18 @@ void sendHandle(EasyTcpClient* pClient)
 
 int main()
 {
-	char buf[128] = {};
-	printf("请输入服务器IP：");
-	scanf("%s",buf);
+	//char buf[128] = {};
+	//printf("请输入服务器IP：");
+	//scanf("%s",buf);
 	
 	EasyTcpClient client1;
-	client1.connectServer(buf, 4567);
+	client1.connectServer("192.168.81.132", 4567);
 
 	EasyTcpClient client2;
-	client2.connectServer(buf, 4567);
+	client2.connectServer("192.168.81.130", 4567);
 
 	EasyTcpClient client3;
-	client3.connectServer(buf, 4567);
+	client3.connectServer("192.168.81.1", 4567);
 
 
 	std::thread userSend1(sendHandle, &client1);
