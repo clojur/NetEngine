@@ -50,8 +50,8 @@ int main()
 	EasyTcpClient client2;
 	client2.connectServer(buf, 4567);
 
-	EasyTcpClient client2;
-	client2.connectServer(buf, 4567);
+	EasyTcpClient client3;
+	client3.connectServer(buf, 4567);
 
 
 	std::thread userSend1(sendHandle, &client1);
@@ -59,6 +59,9 @@ int main()
 
 	std::thread userSend2(sendHandle, &client2);
 	userSend2.detach();
+
+	std::thread userSend3(sendHandle, &client3);
+	userSend3.detach();
 
 	while (client1.isRun())
 	{
