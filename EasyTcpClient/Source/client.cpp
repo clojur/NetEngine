@@ -63,12 +63,15 @@ int main()
 	std::thread userSend3(sendHandle, &client3);
 	userSend3.detach();
 
-	while (client1.isRun())
+	while (client1.isRun()|| client2.isRun()|| client3.isRun())
 	{
 		client1.onRun();
+		client2.onRun();
+		client3.onRun();
 	}
 
 	client1.closeSocket();
 	client2.closeSocket();
+	client3.closeSocket();
 	return 0;
 }

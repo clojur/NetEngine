@@ -189,9 +189,13 @@ int main()
     while (true)
     {
         //伯克利 socket
-        fd_set fdRead; FD_ZERO(&fdRead);
-        fd_set fdWrite; FD_ZERO(&fdWrite);
-        fd_set fdExcept; FD_ZERO(&fdExcept);
+        fd_set fdRead; 
+        fd_set fdWrite; 
+        fd_set fdExcept; 
+
+		FD_ZERO(&fdRead);
+		FD_ZERO(&fdWrite);
+		FD_ZERO(&fdExcept);
         
         FD_SET(_serverSock, &fdRead);
         FD_SET(_serverSock, &fdWrite);
