@@ -13,8 +13,8 @@ void sendHandle(EasyTcpClient* pClient)
 
 		if (0 == strcmp(cmdBuff, "exit"))
 		{
-			printf("任务退出，程序结束\n");
-			pClient->quit();
+			printf("sendHandle线程退出\n");
+			pClient->closeSocket();
 			break;
 		}
 		else if (0 == strcmp(cmdBuff, "login"))
@@ -45,13 +45,13 @@ int main()
 	//scanf("%s",buf);
 	
 	EasyTcpClient client1;
-	client1.connectServer("192.168.81.132", 4567);
+	client1.connectServer("192.168.217.127", 4567);
 
 	EasyTcpClient client2;
-	client2.connectServer("192.168.81.130", 4567);
+	client2.connectServer("192.168.217.128", 4567);
 
 	EasyTcpClient client3;
-	client3.connectServer("192.168.81.1", 4567);
+	client3.connectServer("192.168.217.1", 4567);
 
 
 	std::thread userSend1(sendHandle, &client1);
@@ -73,5 +73,6 @@ int main()
 	client1.closeSocket();
 	client2.closeSocket();
 	client3.closeSocket();
+	system("pause");
 	return 0;
 }

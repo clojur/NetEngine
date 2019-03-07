@@ -88,11 +88,12 @@ bool EasyTcpClient::onRun()
 		fd_set fdReads;
 		FD_ZERO(&fdReads);
 		FD_SET(_sock, &fdReads);
-		timeval tv = { 1,0 };
+		timeval tv = { 0,0 };
 		int ret = select(_sock + 1, &fdReads, 0, 0, &tv);
 		if (ret < 0)
 		{
 			printf("<socket=%d>select任务结束1\n", _sock);
+			closeSocket();
 			return false;
 		}
 		if (FD_ISSET(_sock, &fdReads))
@@ -102,6 +103,7 @@ bool EasyTcpClient::onRun()
 			if (-1 == recvDataHandler())
 			{
 				printf("<socket=%d>select任务结束1\n", _sock);
+				closeSocket();
 				return false;
 			}
 		}
@@ -115,11 +117,6 @@ bool EasyTcpClient::onRun()
 bool EasyTcpClient::isRun()
 {
 	return _sock != INVALID_SOCKET;
-}
-
-void EasyTcpClient::quit()
-{
-	_sock = INVALID_SOCKET;
 }
 
 //接受数据 处理黏包 拆分包
